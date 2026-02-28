@@ -58,15 +58,11 @@ Python, Machine Learning, AWS, SQL, Pandas</textarea
           </div>
 
           <div class="input-group">
-            <label for="resume"
-              ><i data-feather="file-text"></i> Base Resume</label
+            <label for="resume_file"
+              ><i data-feather="upload-cloud"></i> Upload Resume</label
             >
-            <textarea id="resume" rows="5" required>
-Alex Mercer.
-ML Engineer with 3 years of experience.
-Proficient in Python, building ETL pipelines, and training AWS models.
-Looking for remote or Texas roles.</textarea
-            >
+            <input type="file" id="resume_file" accept=".pdf,.doc,.docx,.txt" style="padding: 0.8rem 1rem !important" required />
+            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">Accepts PDF, DOCX, or TXT.</p>
           </div>
 
           <button type="submit" id="run-btn" class="primary-btn">
