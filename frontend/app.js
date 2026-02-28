@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('query', document.querySelector('#query').value);
         formData.append('location', document.querySelector('#location').value);
         formData.append('user_skills', document.querySelector('#skills').value);
-        formData.append('target_top_k', 2);
+        formData.append('target_top_k', 3);
         
         const fileInput = document.querySelector('#resume_file');
         if (fileInput.files.length > 0) {
@@ -137,13 +137,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const accordionHtml = `
                 <div class="accordion-item">
                     <button class="accordion-header">
-                        <span>Generated Application for <strong>${companyName}</strong></span>
+                        <span>Tailored Resume and Cover Letter for <strong>${companyName}</strong></span>
                         <i data-feather="chevron-down" class="accordion-icon"></i>
                     </button>
                     <div class="accordion-content">
                         <div class="accordion-inner">
                             <button class="download-btn primary-btn" style="margin-bottom: 1rem; width: auto; padding: 0.5rem 1rem;" data-company="${escapeHtml(companyName)}" data-text="${escapeHtml(tailoredText)}">
-                                <i data-feather="download"></i> Download as .DOCX
+                                <i data-feather="download"></i> Download as .PDF
                             </button>
                             <div style="white-space: pre-wrap;">${escapeHtml(tailoredText)}</div>
                         </div>
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const companyName = btn.getAttribute('data-company');
                 const text = btn.getAttribute('data-text');
 
-                const response = await fetch('http://localhost:8001/api/download-docx', {
+                const response = await fetch('http://localhost:8001/api/download-pdf', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ company_name: companyName, text: text })
@@ -172,13 +172,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `Application_${companyName.replace(/ /g, '_')}.docx`;
+                    a.download = `Application_${companyName.replace(/ /g, '_')}.pdf`;
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
                     window.URL.revokeObjectURL(url);
                 } else {
-                    alert("Failed to download DOCX.");
+                    alert("Failed to download PDF.");
                 }
             });
         });

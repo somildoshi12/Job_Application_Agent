@@ -9,6 +9,8 @@ import io
 
 import docx
 import PyPDF2
+from fpdf import FPDF
+import markdown2
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -88,26 +90,37 @@ class DocxRequest(BaseModel):
     text: str
     company_name: str
 
-@app.post("/api/download-docx")
-def download_docx(req: DocxRequest):
-    """Generates a .docx file on the fly from the tailored text response"""
-    doc = docx.Document()
+@app.post("/api/download-pdf")
+def download_pdf(req: DocxRequest):
+    """Generates a .pdf file on the fly from the tailored text response"""
+    pdf = FPDF()
+    pdf.add_page()
     
-    for line in req.text.split('\n'):
-        if line.strip() == "":
-            doc.add_paragraph()
-        else:
-            doc.add_paragraph(line)
+    # Add generic fallback fonts
+    pdf.set_font("Helvetica", size=11)
+    
+    # Clean up unsupported unicode chars that break standard PDF encoding
+    safe_text = req.text.replace('•', '-').replace('—', '-').replace('’', "'").replace('“', '"').replace('”', '"')
+    
+    # Convert LLM Markdown output to basic HTML for the PDF engine
+    html_content = markdown2.markdown(safe_text)
+    
+    try:
+        pdf.write_html(html_content)
+    except Exception as e:
+        # Fallback to plain text if HTML parsing fails due to complex markdown
+        pdf.set_font("Helvetica", size=11)
+        for line in safe_text.split('\n'):
+            pdf.multi_cell(0, 5, txt=line)
             
-    file_stream = io.BytesIO()
-    doc.save(file_stream)
-    file_stream.seek(0)
+    pdf_bytes = pdf.output()
+    file_stream = io.BytesIO(pdf_bytes)
     
-    filename = f"Application_{req.company_name.replace(' ', '_')}.docx"
+    filename = f"Application_{req.company_name.replace(' ', '_')}.pdf"
     
     return StreamingResponse(
         file_stream, 
-        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
 
