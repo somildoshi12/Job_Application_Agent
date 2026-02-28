@@ -1,9 +1,14 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel
 from typing import List, Optional
 import os
 import sys
 import json
+import io
+
+import docx
+import PyPDF2
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -22,23 +27,41 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class PipelineRequest(BaseModel):
-    query: str
-    location: str
-    user_skills: List[str]
-    base_resume: str
-    target_top_k: Optional[int] = 3
-
 @app.post("/api/run-pipeline")
-async def execute_pipeline(req: PipelineRequest):
+async def execute_pipeline(
+    query: str = Form(...),
+    location: str = Form(...),
+    user_skills: str = Form(...),
+    target_top_k: int = Form(3),
+    resume_file: UploadFile = File(...)
+):
     try:
+        content = await resume_file.read()
+        filename = resume_file.filename.lower()
+        
+        base_resume_text = ""
+        if filename.endswith(".pdf"):
+            pdf_reader = PyPDF2.PdfReader(io.BytesIO(content))
+            for page in pdf_reader.pages:
+                base_resume_text += page.extract_text() + "\n"
+        elif filename.endswith(".docx") or filename.endswith(".doc"):
+            doc = docx.Document(io.BytesIO(content))
+            for para in doc.paragraphs:
+                base_resume_text += para.text + "\n"
+        elif filename.endswith(".txt"):
+            base_resume_text = content.decode('utf-8')
+        else:
+            raise HTTPException(400, "Unsupported file type. Please upload PDF, DOCX, or TXT.")
+
+        skills_list = [s.strip() for s in user_skills.split(",")]
+
         # Run the core logic
         results = run_pipeline(
-            query=req.query,
-            location=req.location,
-            user_skills=req.user_skills,
-            base_resume_text=req.base_resume,
-            target_top_k=req.target_top_k
+            query=query,
+            location=location,
+            user_skills=skills_list,
+            base_resume_text=base_resume_text,
+            target_top_k=target_top_k
         )
         
         # Load the trace log from disk so we can return it sequentially
@@ -60,6 +83,33 @@ async def execute_pipeline(req: PipelineRequest):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+class DocxRequest(BaseModel):
+    text: str
+    company_name: str
+
+@app.post("/api/download-docx")
+def download_docx(req: DocxRequest):
+    """Generates a .docx file on the fly from the tailored text response"""
+    doc = docx.Document()
+    
+    for line in req.text.split('\n'):
+        if line.strip() == "":
+            doc.add_paragraph()
+        else:
+            doc.add_paragraph(line)
+            
+    file_stream = io.BytesIO()
+    doc.save(file_stream)
+    file_stream.seek(0)
+    
+    filename = f"Application_{req.company_name.replace(' ', '_')}.docx"
+    
+    return StreamingResponse(
+        file_stream, 
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
 
 @app.get("/")
 def health_check():

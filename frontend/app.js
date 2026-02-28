@@ -34,14 +34,17 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // 1. Gather Data
-        const requestData = {
-            query: document.querySelector('#query').value,
-            location: document.querySelector('#location').value,
-            user_skills: document.querySelector('#skills').value.split(',').map(s => s.trim()),
-            base_resume: document.querySelector('#resume').value,
-            target_top_k: 2
-        };
+        // 1. Gather Data using FormData for file upload
+        const formData = new FormData();
+        formData.append('query', document.querySelector('#query').value);
+        formData.append('location', document.querySelector('#location').value);
+        formData.append('user_skills', document.querySelector('#skills').value);
+        formData.append('target_top_k', 2);
+        
+        const fileInput = document.querySelector('#resume_file');
+        if (fileInput.files.length > 0) {
+            formData.append('resume_file', fileInput.files[0]);
+        }
 
         // 2. Transition UI to Loading
         stateWelcome.classList.add('hidden');
@@ -53,8 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Calling API endpoint...");
             const response = await fetch('http://localhost:8001/api/run-pipeline', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestData)
+                // Browser automatically sets Content-Type to multipart/form-data with boundary
+                body: formData
             });
 
             if (!response.ok) {
@@ -138,12 +141,47 @@ document.addEventListener('DOMContentLoaded', () => {
                         <i data-feather="chevron-down" class="accordion-icon"></i>
                     </button>
                     <div class="accordion-content">
-                        <div class="accordion-inner">${escapeHtml(tailoredText)}</div>
+                        <div class="accordion-inner">
+                            <button class="download-btn primary-btn" style="margin-bottom: 1rem; width: auto; padding: 0.5rem 1rem;" data-company="${escapeHtml(companyName)}" data-text="${escapeHtml(tailoredText)}">
+                                <i data-feather="download"></i> Download as .DOCX
+                            </button>
+                            <div style="white-space: pre-wrap;">${escapeHtml(tailoredText)}</div>
+                        </div>
                     </div>
                 </div>
             `;
             resumeAccordion.insertAdjacentHTML('beforeend', accordionHtml);
         }
+
+        // Add download action listeners
+        const downloadBtns = resumeAccordion.querySelectorAll('.download-btn');
+        downloadBtns.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const companyName = btn.getAttribute('data-company');
+                const text = btn.getAttribute('data-text');
+
+                const response = await fetch('http://localhost:8001/api/download-docx', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ company_name: companyName, text: text })
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Application_${companyName.replace(/ /g, '_')}.docx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    alert("Failed to download DOCX.");
+                }
+            });
+        });
 
         // Add accordion interaction logic
         const headers = resumeAccordion.querySelectorAll('.accordion-header');
