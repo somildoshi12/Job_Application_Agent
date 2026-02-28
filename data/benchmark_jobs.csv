@@ -1,0 +1,21 @@
+job_id,title,company,location,is_good_match
+mock_1,Machine Learning Engineer,TechNova Industries,Austin TX,1
+mock_2,Data Scientist,Google,Remote,0
+mock_3,Data Engineer Intern,AI Startup,San Francisco CA,0
+mock_4,Backend Software Engineer,Microsoft,Seattle WA,0
+mock_5,AI Solutions Architect,Nvidia,Austin TX,1
+mock_6,Data Analyst,Amazon,Remote,0
+mock_7,Quantitative Analyst,Two Sigma,New York NY,1
+mock_8,Frontend Developer,Facebook,Menlo Park CA,0
+mock_9,Junior Data Scientist,Unknown LLC,Remote,0
+mock_10,Senior ML Researcher,Apple,Cupertino CA,0
+mock_11,Data Engineering Lead,Stripe,Remote,1
+mock_12,Software Developer,Netflix,Los Gatos CA,0
+mock_13,AI Integrations Engineer,Oracle,Austin TX,1
+mock_14,Data Science Intern,Tiny Startup Co,Boston MA,0
+mock_15,Robotics ML Engineer,Tesla,Austin TX,1
+mock_16,General Programmer,Alphabet,Mountain View CA,0
+mock_17,Cloud ML Architect,AWS,Seattle WA,0
+mock_18,Applied AI Engineer,IBM,Remote,1
+mock_19,LLM Platform Engineer,Anthropic,San Francisco CA,1
+mock_20,Deep Learning Scientist,OpenAI,San Francisco CA,0
