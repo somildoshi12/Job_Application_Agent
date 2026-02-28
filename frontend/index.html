@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Middle America AI Job Agent</title>
+
+    <!-- Modern Typography: Inter and Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Feather Icons for modern UI symbols -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Sidebar Controls -->
+      <aside class="sidebar glass-panel">
+        <div class="logo-container">
+          <i data-feather="briefcase" class="logo-icon"></i>
+          <h2>AI Job Agent</h2>
+        </div>
+
+        <p class="subtitle">Autonomous Search & Tailoring Pipeline</p>
+
+        <form id="agent-form">
+          <div class="input-group">
+            <label for="query"
+              ><i data-feather="search"></i> Job Search Query</label
+            >
+            <input
+              type="text"
+              id="query"
+              value="Machine Learning Engineer"
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <label for="location"
+              ><i data-feather="map-pin"></i> Location</label
+            >
+            <input type="text" id="location" value="Texas" required />
+          </div>
+
+          <div class="input-group">
+            <label for="skills"><i data-feather="code"></i> Your Skills</label>
+            <textarea id="skills" rows="3" required>
+Python, Machine Learning, AWS, SQL, Pandas</textarea
+            >
+          </div>
+
+          <div class="input-group">
+            <label for="resume"
+              ><i data-feather="file-text"></i> Base Resume</label
+            >
+            <textarea id="resume" rows="5" required>
+Alex Mercer.
+ML Engineer with 3 years of experience.
+Proficient in Python, building ETL pipelines, and training AWS models.
+Looking for remote or Texas roles.</textarea
+            >
+          </div>
+
+          <button type="submit" id="run-btn" class="primary-btn">
+            <span>Run AI Pipeline</span>
+            <i data-feather="play"></i>
+          </button>
+        </form>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="main-content">
+        <!-- Default Welcome State -->
+        <div id="welcome-state" class="center-state active">
+          <div class="pulse-ring"></div>
+          <i data-feather="cpu" class="hero-icon pulse-icon"></i>
+          <h1>Agent Ready</h1>
+          <p>
+            Enter your configuration and deploy the autonomous application
+            agent.
+          </p>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loading-state" class="center-state hidden">
+          <div class="loader"></div>
+          <h2 class="gradient-text">Executing Pipeline...</h2>
+          <div id="loader-status" class="status-msg">
+            Searching live SerpAPI for jobs...
+          </div>
+        </div>
+
+        <!-- Dashboard Results -->
+        <div id="dashboard" class="dashboard hidden">
+          <!-- Navigation Tabs -->
+          <div class="tabs js-tabs">
+            <button class="tab-btn active" data-tab="ranked">
+              🏆 Ranked Matches
+            </button>
+            <button class="tab-btn" data-tab="tailored">
+              📝 Tailored Resumes
+            </button>
+            <button class="tab-btn" data-tab="trace">🧠 Agent Trace</button>
+          </div>
+
+          <!-- Tab Contents -->
+          <div class="tab-content-container glass-panel">
+            <!-- Ranked Jobs Tab -->
+            <div id="tab-ranked" class="tab-content active">
+              <div class="grid-layout" id="jobs-grid">
+                <!-- Populated via JS -->
+              </div>
+            </div>
+
+            <!-- Tailored Resumes Tab -->
+            <div id="tab-tailored" class="tab-content">
+              <div class="accordion" id="resume-accordion">
+                <!-- Populated via JS -->
+              </div>
+            </div>
+
+            <!-- Agent Trace Tab -->
+            <div id="tab-trace" class="tab-content">
+              <div class="timeline" id="trace-timeline">
+                <!-- Populated via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+      feather.replace(); // Initialize SVG Icons
+    </script>
+  </body>
+</html>
