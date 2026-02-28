@@ -32,7 +32,7 @@ def tailor_application(job: Job, base_resume_text: str) -> str:
         
     try:
         genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel('gemini-1.5-pro')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         prompt = build_prompt(job, base_resume_text)
         
         response = model.generate_content(prompt)
