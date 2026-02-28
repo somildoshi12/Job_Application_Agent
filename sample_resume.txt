@@ -1,0 +1,33 @@
+John Doe
+Software & AI Engineer
+Houston, TX
+Email: john.doe@example.com | Phone: (555) 123-4567
+
+SUMMARY
+Results-driven AI Engineer with 3 years of experience in developing machine learning models, natural language processing applications, and scalable backend systems. Passionate about solving complex problems using data driven approaches.
+
+EXPERIENCE
+Machine Learning Engineer | Tech Solutions Inc. | Austin, TX
+June 2021 – Present
+- Developed and deployed deep learning models for NLP tasks using Python, PyTorch, and TensorFlow, resulting in a 15% increase in model accuracy.
+- Built scalable data pipelines using Pandas and SQL to process millions of records daily.
+- Deployed models to production using Docker and AWS (EC2, S3).
+- Collaborated with cross-functional teams to integrate ML features into the main user application.
+
+Data Science Intern | Data Analytics Corp | Dallas, TX
+May 2020 – August 2020
+- Assisted in building predictive models using scikit-learn to forecast sales trends.
+- Created data visualizations and dashboards using Tableau and Matplotlib.
+- Cleaned and preprocessed large datasets to ensure data quality.
+
+EDUCATION
+Bachelor of Science in Computer Science
+University of Houston | Houston, TX
+Graduated: May 2021
+Relevant Coursework: Artificial Intelligence, Data Structures, Algorithms, Database Systems.
+
+SKILLS
+Programming Languages: Python, JavaScript, SQL, C++
+Machine Learning: PyTorch, TensorFlow, scikit-learn, Pandas, NumPy
+Tools & Technologies: Git, Docker, AWS, APIs, Streamlit, Git
+Concepts: NLP, Computer Vision, Predictive Modeling, Software Engineering
