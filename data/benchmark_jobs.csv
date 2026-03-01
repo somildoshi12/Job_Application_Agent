@@ -1,21 +1,21 @@
-job_id,title,company,location,is_good_match
-mock_1,Machine Learning Engineer,TechNova Industries,Austin TX,1
-mock_2,Data Scientist,Google,Remote,0
-mock_3,Data Engineer Intern,AI Startup,San Francisco CA,0
-mock_4,Backend Software Engineer,Microsoft,Seattle WA,0
-mock_5,AI Solutions Architect,Nvidia,Austin TX,1
-mock_6,Data Analyst,Amazon,Remote,0
-mock_7,Quantitative Analyst,Two Sigma,New York NY,1
-mock_8,Frontend Developer,Facebook,Menlo Park CA,0
-mock_9,Junior Data Scientist,Unknown LLC,Remote,0
-mock_10,Senior ML Researcher,Apple,Cupertino CA,0
-mock_11,Data Engineering Lead,Stripe,Remote,1
-mock_12,Software Developer,Netflix,Los Gatos CA,0
-mock_13,AI Integrations Engineer,Oracle,Austin TX,1
-mock_14,Data Science Intern,Tiny Startup Co,Boston MA,0
-mock_15,Robotics ML Engineer,Tesla,Austin TX,1
-mock_16,General Programmer,Alphabet,Mountain View CA,0
-mock_17,Cloud ML Architect,AWS,Seattle WA,0
-mock_18,Applied AI Engineer,IBM,Remote,1
-mock_19,LLM Platform Engineer,Anthropic,San Francisco CA,1
-mock_20,Deep Learning Scientist,OpenAI,San Francisco CA,0
+id,title,company,location,description,skills,expected_outcome
+job_1,Machine Learning Engineer,TechCorp,Texas,"We are looking for an ML Engineer to build production models.","Python, Machine Learning, AWS, SQL",Interview
+job_2,Data Scientist,DataWorks,Texas,"Join our Data Science team to analyze massive datasets and build predictive models.","Python, Pandas, SQL, Machine Learning",Interview
+job_3,Backend Python Developer,CloudSys,Remote,"We need a strong Python backend dev familiar with fastAPI and SQL databases.","Python, SQL, PostgreSQL, AWS",Interview
+job_4,AI Software Engineer,FutureAI,Remote,"Build the next generation of LLMs. Experience with Python, AWS, and modern data stacks is required.","Python, LLM, AWS, PostgreSQL",Interview
+job_5,Data Engineer,CloudScale,Texas,"Help us build robust data pipelines on AWS using Python and SQL.","Python, DataBricks, AWS, SQL",Interview
+job_6,Senior Software Engineer - Data,FinTechCo,Remote,"Build high performance data services using Python and Postgres.","Python, SQL, PostgreSQL",Interview
+job_7,Machine Learning Researcher,AILabs,Texas,"Conduct applied research in AI/ML. Solid Python skills needed.","Python, Machine Learning",Interview
+job_8,Analytics Engineer,DataInsights,Remote,"Transform raw data into business value. Strong SQL and Python required.","SQL, Python, Pandas",Interview
+job_9,Cloud Architect - Machine Learning,EnterpriseSys,Texas,"Design our AWS infrastructure for ML deployments.","AWS, Python, Machine Learning",Interview
+job_10,Python Developer,StartupX,Remote,"Generalist Python developer needed for fast-paced startup.","Python, SQL, MongoDB",Interview
+job_11,Frontend React Developer,DesignCo,Texas,"Seeking a UI expert with 5+ years of React and CSS experience.","React, JavaScript, CSS, HTML",Reject
+job_12,HR Manager,PeopleFirst,New York,"Looking for an experienced HR manager to handle payroll and benefits.","HR, Payroll, Management",Reject
+job_13,Graphic Designer,CreativeAgency,California,"Create stunning marketing materials. Adobe Creative Suite required.","Photoshop, Illustrator, InDesign",Reject
+job_14,Sales Executive,SellFast,Remote,"B2B software sales position. High commission potential.","Sales, B2B, Negotiation",Reject
+job_15,C++ Game Developer,GameStudio,Washington,"Develop core game engine mechanics in C++. Unreal Engine experience required.","C++, Unreal Engine, 3D Math",Reject
+job_16,Embedded Systems Engineer,HardwareInc,Texas,"Write low level C code for IoT devices. Hardware experience required.","C, Microcontrollers, IoT",Reject
+job_17,Digital Marketing Specialist,AdTech,Remote,"Drive user acquisition through SEO and paid social campaigns.","SEO, Google Ads, Marketing",Reject
+job_18,iOS Developer,MobileFirst,California,"Build amazing iPhone apps in Swift and Objective-C.","Swift, iOS, Objective-C",Reject
+job_19,Accountant,NumberCrunchers,Texas,"CPA required for tax prep and financial auditing.","Accounting, CPA, Excel",Reject
+job_20,Customer Support Representative,HelpDesk,Remote,"Answer customer tickets and resolve issues.","Customer Service, Communication",Reject
