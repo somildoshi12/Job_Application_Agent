@@ -100,7 +100,13 @@ def download_pdf(req: DocxRequest):
     pdf.set_font("Helvetica", size=11)
     
     # Clean up unsupported unicode chars that break standard PDF encoding
-    safe_text = req.text.replace('•', '-').replace('—', '-').replace('’', "'").replace('“', '"').replace('”', '"')
+    replacements = {
+        '•': '-', '—': '-', '–': '-', '’': "'", '‘': "'", '“': '"', '”': '"', '…': '...'
+    }
+    safe_text = req.text
+    for k, v in replacements.items():
+        safe_text = safe_text.replace(k, v)
+    safe_text = safe_text.encode('latin-1', 'ignore').decode('latin-1')
     
     # Convert LLM Markdown output to basic HTML for the PDF engine
     html_content = markdown2.markdown(safe_text)
@@ -109,6 +115,8 @@ def download_pdf(req: DocxRequest):
         pdf.write_html(html_content)
     except Exception as e:
         # Fallback to plain text if HTML parsing fails due to complex markdown
+        pdf = FPDF()
+        pdf.add_page()
         pdf.set_font("Helvetica", size=11)
         for line in safe_text.split('\n'):
             pdf.multi_cell(0, 5, txt=line)
