@@ -25,15 +25,24 @@ def build_prompt(job: Job, base_resume_text: str) -> str:
     "replacement_operations": a JSON array of objects, where each object has "original_text" (the exact sub-string from the Base Resume you want to change) and "new_text" (the tailored replacement string). Keep replacements short and target specific phrases, not entire paragraphs.
     """
 
-def tailor_application(job: Job, base_resume_text: str) -> str:
-    """Calls Gemini to generate the new resume and changelog."""
+def tailor_application(job: Job, base_resume_text: str) -> dict:
+    """Calls Gemini to generate a tailored resume, cover letter, and replacement ops."""
+    import os
+    from dotenv import load_dotenv
+    load_dotenv()
     
-    if not GEMINI_API_KEY or GEMINI_API_KEY == "your_gemini_key_here":
+    current_api_key = os.getenv("GEMINI_API_KEY", "")
+    
+    if not current_api_key or current_api_key == "your_gemini_key_here":
         print("GEMINI_API_KEY not found or invalid. Using mock tailored response.")
-        return f"MOCK TAILORED RESUME FOR: {job.title}\n\n[Base resume content reordered to emphasize {', '.join(job.skills)}]\n\n///CHANGELOG///\n- Emphasized Python and Machine Learning skills.\n- Reordered Data Engineering internship to top."
+        return {
+            "cover_letter": f"Mock Cover Letter for {job.title} at {job.company}.",
+            "tailored_resume": f"# Mock Tailored Resume\n\nThis is a mock tailored resume for **{job.title}** at **{job.company}**.\n\n## Skills\n\n- {chr(10)+'- '.join(job.skills)}",
+            "replacement_operations": [{"original_text": "Sample Data", "new_text": "Tailored Data"}]
+        }
         
     try:
-        genai.configure(api_key=GEMINI_API_KEY)
+        genai.configure(api_key=current_api_key)
         model = genai.GenerativeModel('gemini-2.5-flash')
         prompt = build_prompt(job, base_resume_text)
         
@@ -44,6 +53,7 @@ def tailor_application(job: Job, base_resume_text: str) -> str:
         
         return {
             "cover_letter": out.get("cover_letter", ""),
+            "tailored_resume": out.get("tailored_resume", ""),
             "replacement_operations": out.get("replacement_operations", [])
         }
         
@@ -51,5 +61,6 @@ def tailor_application(job: Job, base_resume_text: str) -> str:
         print(f"Error calling Gemini LLM: {e}. Falling back to mock data.")
         return {
             "cover_letter": "Mock Cover Letter.",
-            "replacement_operations": []
+            "tailored_resume": f"Mock Tailored Resume for {job.title} at {job.company}.",
+            "replacement_operations": [{"original_text": "Data Engineering", "new_text": "Data Engineering & Machine Learning"}]
         }
