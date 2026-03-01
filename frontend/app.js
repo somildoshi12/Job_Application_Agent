@@ -130,9 +130,14 @@ document.addEventListener('DOMContentLoaded', () => {
         resumeAccordion.innerHTML = '';
         
         // Match up the raw text with the job metadata
-        for (const [jobId, tailoredText] of Object.entries(tailoredDict)) {
+        for (const [jobId, tailoredObj] of Object.entries(tailoredDict)) {
             const jobData = rankedJobs.find(j => j.id === jobId);
             const companyName = jobData ? jobData.company : "Unknown Company";
+            
+            const cvText = tailoredObj.cover_letter || "";
+            const resumeText = tailoredObj.tailored_resume || "";
+            
+            const combinedPreview = `# Cover Letter\n\n${cvText}\n\n# Tailored Resume\n\n${resumeText}`;
             
             const accordionHtml = `
                 <div class="accordion-item">
@@ -142,10 +147,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     </button>
                     <div class="accordion-content">
                         <div class="accordion-inner">
-                            <button class="download-btn primary-btn" style="margin-bottom: 1rem; width: auto; padding: 0.5rem 1rem;" data-company="${escapeHtml(companyName)}" data-text="${escapeHtml(tailoredText)}">
-                                <i data-feather="download"></i> Download as .PDF
-                            </button>
-                            <div style="white-space: pre-wrap;">${escapeHtml(tailoredText)}</div>
+                            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                <button class="download-btn cv-btn primary-btn" style="width: auto; padding: 0.5rem 1rem;" data-company="${escapeHtml(companyName)}" data-type="Cover_Letter" data-text="${escapeHtml(cvText)}">
+                                    <i data-feather="download"></i> Cover Letter (.DOCX)
+                                </button>
+                                <button class="download-btn resume-btn primary-btn" style="width: auto; padding: 0.5rem 1rem;" data-company="${escapeHtml(companyName)}" data-type="Resume" data-text="${escapeHtml(resumeText)}">
+                                    <i data-feather="download"></i> Tailored Resume (.DOCX)
+                                </button>
+                            </div>
+                            <div style="white-space: pre-wrap;">${escapeHtml(combinedPreview)}</div>
                         </div>
                     </div>
                 </div>
@@ -159,9 +169,10 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', async (e) => {
                 e.preventDefault();
                 const companyName = btn.getAttribute('data-company');
+                const docType = btn.getAttribute('data-type');
                 const text = btn.getAttribute('data-text');
 
-                const response = await fetch('http://localhost:8001/api/download-pdf', {
+                const response = await fetch('http://localhost:8001/api/download-docx', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ company_name: companyName, text: text })
@@ -172,13 +183,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `Application_${companyName.replace(/ /g, '_')}.pdf`;
+                    a.download = `${companyName.replace(/ /g, '_')}_${docType}.docx`;
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
                     window.URL.revokeObjectURL(url);
                 } else {
-                    alert("Failed to download PDF.");
+                    alert("Failed to download DOCX.");
                 }
             });
         });

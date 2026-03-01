@@ -6,7 +6,7 @@ def build_prompt(job: Job, base_resume_text: str) -> str:
     """Creates the prompt forcing the LLM to tailor the resume ethically."""
     return f"""
     You are an expert AI Job Application Agent.
-    Your task is to tailor the candidate's base resume to the following job description.
+    Your task is to generate a custom cover letter and completely tailor the candidate's base resume to the following job description.
     
     CRITICAL RULE: YOU MUST BE ETHICAL.
     You may ONLY reorder bullet points, change templates, or add industry keywords.
@@ -20,7 +20,9 @@ def build_prompt(job: Job, base_resume_text: str) -> str:
     CANDIDATE's BASE RESUME:
     {base_resume_text}
     
-    Output the tailored resume exactly as it should look. At the very end of your response, add a section called "///CHANGELOG///" where you list exactly what changes you made so the user can verify them.
+    Return your response strictly as a JSON object with two string keys:
+    "cover_letter": a professionally written cover letter.
+    "tailored_resume": the fully tailored resume in markdown format. Do NOT wrap the JSON inside markdown code blocks, just output the raw JSON string.
     """
 
 def tailor_application(job: Job, base_resume_text: str) -> str:
@@ -35,9 +37,19 @@ def tailor_application(job: Job, base_resume_text: str) -> str:
         model = genai.GenerativeModel('gemini-2.5-flash')
         prompt = build_prompt(job, base_resume_text)
         
-        response = model.generate_content(prompt)
-        return response.text
+        response = model.generate_content(prompt, generation_config={"response_mime_type": "application/json"})
+        
+        import json
+        out = json.loads(response.text)
+        
+        return {
+            "cover_letter": out.get("cover_letter", ""),
+            "tailored_resume": out.get("tailored_resume", "")
+        }
         
     except Exception as e:
         print(f"Error calling Gemini LLM: {e}. Falling back to mock data.")
-        return f"MOCK TAILORED RESUME FOR: {job.title}\n\n[Base resume content reordered to emphasize {', '.join(job.skills)}]\n\n///CHANGELOG///\n- Emphasized Python and Machine Learning skills.\n- Reordered Data Engineering internship to top."
+        return {
+            "cover_letter": "Mock Cover Letter.",
+            "tailored_resume": f"Mock Tailored Resume for {job.title} at {job.company}."
+        }

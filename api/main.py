@@ -6,11 +6,10 @@ import os
 import sys
 import json
 import io
+import re
 
 import docx
 import PyPDF2
-from fpdf import FPDF
-import markdown2
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -90,45 +89,55 @@ class DocxRequest(BaseModel):
     text: str
     company_name: str
 
-@app.post("/api/download-pdf")
-def download_pdf(req: DocxRequest):
-    """Generates a .pdf file on the fly from the tailored text response"""
-    pdf = FPDF()
-    pdf.add_page()
+@app.post("/api/download-docx")
+def download_docx(req: DocxRequest):
+    """Generates a beautifully formatted .docx file from the tailored Markdown text"""
+    doc = docx.Document()
     
-    # Add generic fallback fonts
-    pdf.set_font("Helvetica", size=11)
+    # We add a nice document title to make the formatting pop
+    doc.add_heading(f"Application for {req.company_name}", 0)
     
-    # Clean up unsupported unicode chars that break standard PDF encoding
-    replacements = {
-        '•': '-', '—': '-', '–': '-', '’': "'", '‘': "'", '“': '"', '”': '"', '…': '...'
-    }
-    safe_text = req.text
-    for k, v in replacements.items():
-        safe_text = safe_text.replace(k, v)
-    safe_text = safe_text.encode('latin-1', 'ignore').decode('latin-1')
-    
-    # Convert LLM Markdown output to basic HTML for the PDF engine
-    html_content = markdown2.markdown(safe_text)
-    
-    try:
-        pdf.write_html(html_content)
-    except Exception as e:
-        # Fallback to plain text if HTML parsing fails due to complex markdown
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Helvetica", size=11)
-        for line in safe_text.split('\n'):
-            pdf.multi_cell(0, 5, txt=line)
+    for line in req.text.split('\n'):
+        line = line.strip()
+        if not line:
+            doc.add_paragraph()
+            continue
             
-    pdf_bytes = pdf.output()
-    file_stream = io.BytesIO(pdf_bytes)
+        # Parse markdown headers
+        if line.startswith("# "):
+            doc.add_heading(line[2:], level=1)
+        elif line.startswith("## "):
+            doc.add_heading(line[3:], level=2)
+        elif line.startswith("### "):
+            doc.add_heading(line[4:], level=3)
+        else:
+            # Check if this is a bullet point
+            is_bullet = line.startswith("- ") or line.startswith("* ")
+            
+            if is_bullet:
+                p = doc.add_paragraph(style='List Bullet')
+                text_content = line[2:]
+            else:
+                p = doc.add_paragraph()
+                text_content = line
+                
+            # Parse simple **bold** tags into Word Run objects
+            parts = text_content.split('**')
+            for i, part in enumerate(parts):
+                # Even indices are normal text, odd indices are bolded text between the ** flags
+                run = p.add_run(part)
+                if i % 2 != 0:
+                    run.bold = True
+                    
+    file_stream = io.BytesIO()
+    doc.save(file_stream)
+    file_stream.seek(0)
     
-    filename = f"Application_{req.company_name.replace(' ', '_')}.pdf"
+    filename = f"{req.company_name.replace(' ', '_')}.docx"
     
     return StreamingResponse(
         file_stream, 
-        media_type="application/pdf",
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
 
