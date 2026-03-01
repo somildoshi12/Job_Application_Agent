@@ -9,8 +9,10 @@ from .extract import extract_jobs
 from .filter_rules import evaluate_filters
 from .ranker import rank_jobs
 from .tailor_llm import tailor_application
+from .docx_editor import apply_in_place_edits
+import base64
 
-def run_pipeline(query: str, location: str, user_skills: List[str], base_resume_text: str, target_top_k: int = 3):
+def run_pipeline(query: str, location: str, user_skills: List[str], base_resume_text: str = "", base_resume_bytes: bytes = None, target_top_k: int = 3):
     trace_log: List[Decision] = []
     
     # STEP 1: Search & Extract
@@ -59,7 +61,18 @@ def run_pipeline(query: str, location: str, user_skills: List[str], base_resume_
     
     tailored_results = {}
     for job in top_jobs:
+        # 1. LLM Generation
         result = tailor_application(job, base_resume_text)
+        
+        # 2. In-Place DOCX Edit (if binary was provided)
+        if base_resume_bytes and result.get("replacement_operations"):
+            try:
+                edited_bytes = apply_in_place_edits(base_resume_bytes, result["replacement_operations"])
+                # We encode the binary to base64 so it can be serialized in the final JSON response payload
+                result["tailored_docx_b64"] = base64.b64encode(edited_bytes).decode('utf-8')
+            except Exception as e:
+                print(f"Error applying in-place DOCX edits: {e}")
+                
         tailored_results[job.id] = result
         
         trace_log.append(Decision(

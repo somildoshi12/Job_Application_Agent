@@ -135,9 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const companyName = jobData ? jobData.company : "Unknown Company";
             
             const cvText = tailoredObj.cover_letter || "";
-            const resumeText = tailoredObj.tailored_resume || "";
+            const tailoredDocxB64 = tailoredObj.tailored_docx_b64 || "";
             
-            const combinedPreview = `# Cover Letter\n\n${cvText}\n\n# Tailored Resume\n\n${resumeText}`;
+            const combinedPreview = `# Cover Letter\n\n${cvText}\n\n# Tailored Resume\n\n*Direct in-place DOCX editing complete. Open the downloaded file to see your tailored resume in its original formatting!*`;
             
             const accordionHtml = `
                 <div class="accordion-item">
@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <button class="download-btn cv-btn primary-btn" style="width: auto; padding: 0.5rem 1rem;" data-company="${escapeHtml(companyName)}" data-type="Cover_Letter" data-text="${escapeHtml(cvText)}">
                                     <i data-feather="download"></i> Cover Letter (.DOCX)
                                 </button>
-                                <button class="download-btn resume-btn primary-btn" style="width: auto; padding: 0.5rem 1rem;" data-company="${escapeHtml(companyName)}" data-type="Resume" data-text="${escapeHtml(resumeText)}">
+                                <button class="download-btn resume-btn primary-btn" style="width: auto; padding: 0.5rem 1rem;" data-company="${escapeHtml(companyName)}" data-type="Tailored_Resume" data-b64="${escapeHtml(tailoredDocxB64)}">
                                     <i data-feather="download"></i> Tailored Resume (.DOCX)
                                 </button>
                             </div>
@@ -170,12 +170,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 const companyName = btn.getAttribute('data-company');
                 const docType = btn.getAttribute('data-type');
-                const text = btn.getAttribute('data-text');
+                
+                let endpoint = 'http://localhost:8001/api/download-docx';
+                let payload = {};
+                
+                if (docType === "Tailored_Resume") {
+                    endpoint = 'http://localhost:8001/api/download-tailored-docx';
+                    payload = {
+                        company_name: companyName,
+                        b64_bytes: btn.getAttribute('data-b64')
+                    };
+                } else {
+                    payload = {
+                        company_name: companyName,
+                        text: btn.getAttribute('data-text')
+                    };
+                }
 
-                const response = await fetch('http://localhost:8001/api/download-docx', {
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ company_name: companyName, text: text })
+                    body: JSON.stringify(payload)
                 });
 
                 if (response.ok) {

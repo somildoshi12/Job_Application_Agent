@@ -62,6 +62,7 @@ async def execute_pipeline(
             location=location,
             user_skills=skills_list,
             base_resume_text=base_resume_text,
+            base_resume_bytes=content if filename.endswith(('.docx', '.doc')) else None,
             target_top_k=target_top_k
         )
         
@@ -85,55 +86,21 @@ async def execute_pipeline(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-class DocxRequest(BaseModel):
-    text: str
+class DownloadTailoredDocxRequest(BaseModel):
+    b64_bytes: str
     company_name: str
 
-@app.post("/api/download-docx")
-def download_docx(req: DocxRequest):
-    """Generates a beautifully formatted .docx file from the tailored Markdown text"""
-    doc = docx.Document()
+@app.post("/api/download-tailored-docx")
+def download_tailored_docx(req: DownloadTailoredDocxRequest):
+    """
+    Decodes the dynamically-modified base64 DOCX binary returned by the Agent pipeline
+    and prompts the user's browser to download it as a native Word Document.
+    """
+    import base64
+    raw_bytes = base64.b64decode(req.b64_bytes)
     
-    # We add a nice document title to make the formatting pop
-    doc.add_heading(f"Application for {req.company_name}", 0)
-    
-    for line in req.text.split('\n'):
-        line = line.strip()
-        if not line:
-            doc.add_paragraph()
-            continue
-            
-        # Parse markdown headers
-        if line.startswith("# "):
-            doc.add_heading(line[2:], level=1)
-        elif line.startswith("## "):
-            doc.add_heading(line[3:], level=2)
-        elif line.startswith("### "):
-            doc.add_heading(line[4:], level=3)
-        else:
-            # Check if this is a bullet point
-            is_bullet = line.startswith("- ") or line.startswith("* ")
-            
-            if is_bullet:
-                p = doc.add_paragraph(style='List Bullet')
-                text_content = line[2:]
-            else:
-                p = doc.add_paragraph()
-                text_content = line
-                
-            # Parse simple **bold** tags into Word Run objects
-            parts = text_content.split('**')
-            for i, part in enumerate(parts):
-                # Even indices are normal text, odd indices are bolded text between the ** flags
-                run = p.add_run(part)
-                if i % 2 != 0:
-                    run.bold = True
-                    
-    file_stream = io.BytesIO()
-    doc.save(file_stream)
-    file_stream.seek(0)
-    
-    filename = f"{req.company_name.replace(' ', '_')}.docx"
+    file_stream = io.BytesIO(raw_bytes)
+    filename = f"{req.company_name.replace(' ', '_')}_Tailored_Resume.docx"
     
     return StreamingResponse(
         file_stream, 

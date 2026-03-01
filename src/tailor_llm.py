@@ -3,13 +3,13 @@ from .config import GEMINI_API_KEY
 from .models import Job
 
 def build_prompt(job: Job, base_resume_text: str) -> str:
-    """Creates the prompt forcing the LLM to tailor the resume ethically."""
+    """Creates the prompt forcing the LLM to tailor the resume ethically in-place."""
     return f"""
     You are an expert AI Job Application Agent.
-    Your task is to generate a custom cover letter and completely tailor the candidate's base resume to the following job description.
+    Your task is to generate a custom cover letter and a list of exact text replacements to tailor the candidate's base resume to the following job description.
     
     CRITICAL RULE: YOU MUST BE ETHICAL.
-    You may ONLY reorder bullet points, change templates, or add industry keywords.
+    You may ONLY suggest replacing generic achievement metrics with targeted industry keywords found in the Job Description.
     You may NEVER invent experiences, skills, or jobs the candidate never had.
     
     JOB TITLE: {job.title}
@@ -20,9 +20,9 @@ def build_prompt(job: Job, base_resume_text: str) -> str:
     CANDIDATE's BASE RESUME:
     {base_resume_text}
     
-    Return your response strictly as a JSON object with two string keys:
-    "cover_letter": a professionally written cover letter.
-    "tailored_resume": the fully tailored resume in markdown format. Do NOT wrap the JSON inside markdown code blocks, just output the raw JSON string.
+    Return your response strictly as a JSON object with two keys:
+    "cover_letter": a professionally written cover letter in markdown format.
+    "replacement_operations": a JSON array of objects, where each object has "original_text" (the exact sub-string from the Base Resume you want to change) and "new_text" (the tailored replacement string). Keep replacements short and target specific phrases, not entire paragraphs.
     """
 
 def tailor_application(job: Job, base_resume_text: str) -> str:
@@ -44,12 +44,12 @@ def tailor_application(job: Job, base_resume_text: str) -> str:
         
         return {
             "cover_letter": out.get("cover_letter", ""),
-            "tailored_resume": out.get("tailored_resume", "")
+            "replacement_operations": out.get("replacement_operations", [])
         }
         
     except Exception as e:
         print(f"Error calling Gemini LLM: {e}. Falling back to mock data.")
         return {
             "cover_letter": "Mock Cover Letter.",
-            "tailored_resume": f"Mock Tailored Resume for {job.title} at {job.company}."
+            "replacement_operations": []
         }
