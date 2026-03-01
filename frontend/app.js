@@ -243,7 +243,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Utility to prevent HTML injection in the LLM text
     function escapeHtml(unsafe) {
-        return unsafe
+        if (!unsafe) return "";
+        return String(unsafe)
              .replace(/&/g, "&amp;")
              .replace(/</g, "&lt;")
              .replace(/>/g, "&gt;")
