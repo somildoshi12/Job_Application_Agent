@@ -86,6 +86,52 @@ async def execute_pipeline(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+class DocxFromTextRequest(BaseModel):
+    text: str
+    company_name: str
+
+@app.post("/api/download-docx")
+def download_cover_letter_docx(req: DocxFromTextRequest):
+    """Generates a nicely formatted .docx from markdown text (used for Cover Letters)."""
+    doc = docx.Document()
+    doc.add_heading(f"Cover Letter – {req.company_name}", 0)
+
+    for line in req.text.split('\n'):
+        line = line.strip()
+        if not line:
+            doc.add_paragraph()
+            continue
+        if line.startswith("# "):
+            doc.add_heading(line[2:], level=1)
+        elif line.startswith("## "):
+            doc.add_heading(line[3:], level=2)
+        elif line.startswith("### "):
+            doc.add_heading(line[4:], level=3)
+        else:
+            is_bullet = line.startswith("- ") or line.startswith("* ")
+            if is_bullet:
+                p = doc.add_paragraph(style='List Bullet')
+                text_content = line[2:]
+            else:
+                p = doc.add_paragraph()
+                text_content = line
+            parts = text_content.split('**')
+            for i, part in enumerate(parts):
+                run = p.add_run(part)
+                if i % 2 != 0:
+                    run.bold = True
+
+    file_stream = io.BytesIO()
+    doc.save(file_stream)
+    file_stream.seek(0)
+    filename = f"{req.company_name.replace(' ', '_')}_Cover_Letter.docx"
+    return StreamingResponse(
+        file_stream,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
 class DownloadTailoredDocxRequest(BaseModel):
     b64_bytes: str
     company_name: str
